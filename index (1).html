@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="classic">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>AI Prompt Optimizer</title>
+<style>
+  /* ============ TEME ============ */
+  :root, [data-theme="classic"]{
+    --bg:#eef0f4; --surface:#ffffff; --surface-2:#f6f7f9;
+    --text:#161a23; --muted:#697386; --border:#e0e4ea;
+    --accent:#4f46e5; --accent-2:#6366f1; --accent-text:#ffffff;
+    --btn:#ffffff; --btn-border:#dce0e7;
+    --good:#16a34a; --rec:#e11d48; --shadow:rgba(20,24,40,.14);
+  }
+  [data-theme="dark"]{
+    --bg:#0e1014; --surface:#181b22; --surface-2:#20242d;
+    --text:#e7eaef; --muted:#98a1b0; --border:#2a2f3a;
+    --accent:#6366f1; --accent-2:#818cf8; --accent-text:#ffffff;
+    --btn:#262b35; --btn-border:#333a46;
+    --good:#22c55e; --rec:#f43f5e; --shadow:rgba(0,0,0,.5);
+  }
+  [data-theme="marine"]{
+    --bg:#071624; --surface:#0e2439; --surface-2:#123049;
+    --text:#dbeafe; --muted:#7fa3c4; --border:#1c3a57;
+    --accent:#2196f3; --accent-2:#4dabf5; --accent-text:#ffffff;
+    --btn:#173a58; --btn-border:#24537d;
+    --good:#34d399; --rec:#f43f5e; --shadow:rgba(0,0,0,.5);
+  }
+  [data-theme="forest"]{
+    --bg:#0c1710; --surface:#132419; --surface-2:#1a3022;
+    --text:#d8f0dc; --muted:#8bae94; --border:#234030;
+    --accent:#2e9e4f; --accent-2:#48bd6a; --accent-text:#ffffff;
+    --btn:#1f3a29; --btn-border:#2f5a3f;
+    --good:#4ade80; --rec:#f43f5e; --shadow:rgba(0,0,0,.5);
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+    font-size:16px; line-height:1.45;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+    transition:background .25s, color .25s;
+  }
+  .wrap{ max-width:680px; margin:0 auto; padding:0 14px; }
+  .copyright{ text-align:center; color:var(--muted); font-size:.72rem; margin:10px 0 24px; }
+
+  /* ============ HEADER ============ */
+  header{
+    position:sticky; top:0; z-index:20;
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+    box-shadow:0 1px 8px var(--shadow);
+  }
+  .head-inner{ max-width:680px; margin:0 auto; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .brand{ font-weight:800; font-size:1.02rem; letter-spacing:.2px; display:flex; align-items:center; gap:7px; margin-right:auto; }
+  .brand .dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent); }
+  header select, .info-btn{
+    font-size:15px; min-height:42px; padding:6px 10px; border-radius:10px;
+    background:var(--surface-2); color:var(--text); border:1px solid var(--border);
+    font-weight:600; cursor:pointer;
+  }
+  .info-btn{ min-width:44px; }
+
+  /* ============ CARDURI ============ */
+  main{ padding-top:14px; }
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:12px; margin-bottom:14px; box-shadow:0 1px 4px var(--shadow);
+  }
+  .lbl{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:.95rem; margin:2px 2px 8px; }
+  .lbl .hint{ font-weight:500; color:var(--muted); font-size:.8rem; }
+
+  textarea{
+    width:100%; border:1px solid var(--border); border-radius:12px;
+    background:var(--surface-2); color:var(--text);
+    font-size:16px; line-height:1.5; padding:12px; resize:vertical;
+    font-family:inherit; min-height:130px;
+    transition:border-color .15s, background .25s, color .25s;
+  }
+  textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent); }
+  #output{ min-height:170px; }
+
+  .meta{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:6px; padding:0 3px; }
+  .count{ font-size:.72rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+
+  /* ============ TOOLBAR ============ */
+  .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .tbtn{
+    min-width:44px; min-height:44px; padding:0 12px;
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    background:var(--btn); color:var(--text); border:1px solid var(--btn-border);
+    border-radius:12px; font-size:1.15rem; cursor:pointer;
+    transition:transform .08s, background .15s, border-color .15s;
+    user-select:none;
+  }
+  .tbtn:active{ transform:scale(.93); }
+  .tbtn:disabled{ opacity:.38; cursor:default; }
+  .tbtn.ok{ background:var(--good); border-color:var(--good); color:#fff; }
+  .tbtn.muted{ opacity:.5; }
+  .tbtn.rec{ background:var(--rec); border-color:var(--rec); color:#fff; animation:pulse 1s infinite; }
+  @keyframes pulse{ 0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb,var(--rec) 55%,transparent);} 50%{ box-shadow:0 0 0 7px transparent;} }
+  .tbtn:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent); }
+
+  /* ============ SETARI ============ */
+  .controls{ display:grid; grid-template-columns:1fr; gap:14px; }
+  .ctrl label{ display:block; font-weight:700; font-size:.85rem; margin:0 2px 6px; }
+  .ctrl select{
+    width:100%; font-size:16px; min-height:48px; padding:10px 12px; border-radius:12px;
+    background:var(--surface-2); color:var(--text); border:1px solid var(--border); font-weight:600;
+  }
+  .segmented{ display:flex; flex-wrap:wrap; gap:8px; }
+  .segmented button{
+    flex:1 1 calc(50% - 4px); min-width:calc(50% - 4px); min-height:46px;
+    background:var(--surface-2); color:var(--text); border:1px solid var(--border);
+    border-radius:12px; font-size:.9rem; font-weight:600; cursor:pointer;
+    transition:transform .08s, background .15s;
+  }
+  .segmented button:active{ transform:scale(.96); }
+  .segmented button.active{ background:var(--accent); color:var(--accent-text); border-color:var(--accent); }
+  .segmented.seg3 button{ flex:1 1 calc(33.333% - 6px); min-width:0; padding:0 6px; }
+  .chk-row{ display:flex; align-items:center; gap:10px; margin-top:12px; font-weight:600; font-size:.9rem; cursor:pointer; }
+  .chk-row input{ width:22px; height:22px; accent-color:var(--accent); flex:0 0 auto; }
+  #otherCountry{
+    margin-top:10px; width:100%; font-size:16px; min-height:48px; padding:10px 12px; border-radius:12px;
+    background:var(--surface-2); color:var(--text); border:1px solid var(--border);
+  }
+
+  /* ============ GENEREAZA ============ */
+  .generate{
+    width:100%; min-height:56px; margin-top:2px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:var(--accent-text); border:none; border-radius:14px;
+    font-size:1.1rem; font-weight:800; cursor:pointer; letter-spacing:.2px;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 40%,transparent);
+    transition:transform .08s;
+  }
+  .generate:active{ transform:scale(.98); }
+
+  /* ============ FAB NOTITE ============ */
+  .fab{
+    position:fixed; z-index:30;
+    left:14px; right:14px; bottom:calc(14px + env(safe-area-inset-bottom));
+    max-width:652px; margin:0 auto; min-height:52px;
+    border:1px solid var(--btn-border); background:var(--surface); color:var(--text);
+    border-radius:16px; font-size:1rem; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    box-shadow:0 6px 20px var(--shadow); transition:transform .08s, opacity .2s;
+  }
+  .fab:active{ transform:scale(.98); }
+  .fab .badge{ font-size:.72rem; font-weight:600; color:var(--muted); }
+
+  /* ============ BOTTOM SHEET ============ */
+  .backdrop{ position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:opacity .3s; }
+  .backdrop.show{ opacity:1; pointer-events:auto; }
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    height:88vh; max-width:680px; margin:0 auto;
+    background:var(--surface); border-radius:20px 20px 0 0; border-top:1px solid var(--border);
+    box-shadow:0 -8px 30px var(--shadow);
+    transform:translateY(100%); transition:transform .32s cubic-bezier(.32,.72,0,1);
+    display:flex; flex-direction:column; padding-bottom:env(safe-area-inset-bottom); touch-action:none;
+  }
+  .sheet[data-state="peek"]{ transform:translateY(66%); }
+  .sheet[data-state="expanded"]{ transform:translateY(0); }
+  .grip{ padding:10px 0 4px; display:flex; justify-content:center; cursor:grab; }
+  .grip span{ width:44px; height:5px; border-radius:3px; background:var(--muted); opacity:.5; }
+  .sheet-head{ display:flex; align-items:center; gap:8px; padding:2px 16px 8px; }
+  .sheet-head b{ font-size:1rem; }
+  .sheet-body{ flex:1; display:flex; flex-direction:column; padding:0 14px 14px; overflow:hidden; }
+  #notes{ flex:1; min-height:0; resize:none; }
+
+  /* ============ MODAL GHID ============ */
+  .modal-back{ position:fixed; inset:0; z-index:90; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:18px; }
+  .modal-back.show{ display:flex; }
+  .modal{
+    background:var(--surface); color:var(--text); border:1px solid var(--border);
+    border-radius:18px; max-width:520px; width:100%; max-height:85vh;
+    overflow:hidden; display:flex; flex-direction:column; box-shadow:0 20px 50px var(--shadow);
+  }
+  .modal-top{
+    position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:8px;
+    padding:12px 14px; background:var(--surface); border-bottom:1px solid var(--border);
+  }
+  .modal-top h3{ margin:0; flex:1; font-size:1.1rem; }
+  .modal-scroll{ overflow:auto; padding:14px 16px; }
+  .modal h3{ font-size:1.15rem; }
+  .modal details.expl{ margin:2px 0 12px; border:1px solid var(--border); border-radius:12px; padding:2px 12px; background:var(--surface-2); }
+  .modal details.expl summary{ cursor:pointer; font-weight:700; padding:9px 0; color:var(--accent); list-style:none; }
+  .modal details.expl summary::-webkit-details-marker{ display:none; }
+  .modal details.expl ol{ margin:6px 0; }
+  .modal p{ margin:6px 0; color:var(--text); }
+  .modal ol{ padding-left:20px; margin:8px 0; } .modal li{ margin:7px 0; }
+  .modal ul{ padding-left:18px; margin:4px 0; } .modal ul li{ margin:3px 0; }
+  .modal .warn{ color:#ef4444; font-weight:800; background:color-mix(in srgb,#ef4444 12%, var(--surface)); border:1.5px solid #ef4444; border-radius:12px; padding:12px 14px; margin:4px 0 12px; line-height:1.5; }
+  .modal .warn b{ color:#ef4444; }
+  .modal .sub{ color:var(--muted); font-size:.86rem; }
+  .modal .close{ width:100%; min-height:52px; margin-top:14px; background:var(--accent); color:var(--accent-text); border:none; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer; }
+
+  /* ============ TOAST ============ */
+  .toast{
+    position:fixed; z-index:99; left:50%; transform:translateX(-50%) translateY(20px);
+    bottom:calc(84px + env(safe-area-inset-bottom));
+    background:var(--text); color:var(--bg); padding:11px 18px; border-radius:12px;
+    font-size:.9rem; font-weight:600; opacity:0; pointer-events:none;
+    transition:opacity .25s, transform .25s; box-shadow:0 6px 20px var(--shadow); max-width:90vw; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+<!-- © 2026 Sebastian Florin. Toate drepturile rezervate. Cod proprietar. -->
+
+<header>
+  <div class="head-inner">
+    <div class="brand"><span class="dot"></span> AI Prompt Optimizer</div>
+    <button class="info-btn" id="guideBtn" aria-label="Ghid">ℹ️</button>
+    <select id="themeSel" aria-label="Temă">
+      <option value="classic">☀️ Clasic</option>
+      <option value="dark">🌙 Dark</option>
+      <option value="marine">🌊 Blue Marine</option>
+      <option value="forest">🌲 Forest</option>
+    </select>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- INPUT -->
+  <section class="card">
+    <div class="lbl">✍️ Ideea ta <span class="hint">scrie scurt, motorul o dezvoltă</span></div>
+    <textarea id="input" placeholder="Ex: vreau un plan de întreținere pentru un Volvo FH la 44 tone, cu costuri estimate..."></textarea>
+    <div class="meta"><div class="count" id="count-input"></div></div>
+    <div class="toolbar" data-for="input">
+      <button class="tbtn" data-act="mic" title="Dictează">🎤</button>
+      <button class="tbtn" data-act="copy" title="Copiază">📋</button>
+      <button class="tbtn" data-act="clear" title="Șterge">🗑️</button>
+      <button class="tbtn" data-act="undo" title="Înapoi">↩️</button>
+      <button class="tbtn" data-act="redo" title="Înainte">↪️</button>
+    </div>
+  </section>
+
+  <!-- SETARI -->
+  <section class="card">
+    <div class="controls">
+      <div class="ctrl">
+        <label for="domainSel">🎯 Domeniu</label>
+        <select id="domainSel">
+          <option value="auto">Auto — detectează domeniul</option>
+          <option value="medical">Medical / Sănătate</option>
+          <option value="eng">Inginerie / Tehnic</option>
+          <option value="metal">Metalurgie / Tratamente Termice</option>
+          <option value="it">IT / Programare</option>
+          <option value="legal">Juridic</option>
+          <option value="finance">Financiar / Business</option>
+          <option value="science">Științific / Cercetare</option>
+          <option value="transport">Transport / HGV / Logistică</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <label for="currencySel">💱 Monedă în estimări</label>
+        <select id="currencySel">
+          <option value="none">— Fără estimări financiare —</option>
+          <option value="lei">Doar LEI (RON)</option>
+          <option value="gbp">Doar GBP (£)</option>
+          <option value="mix">Mix LEI / GBP / EUR</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <label>🌍 Regiune pentru linkuri</label>
+        <div class="segmented" id="regionSeg">
+          <button data-region="ro">🇷🇴 România</button>
+          <button data-region="uk">🇬🇧 UK</button>
+          <button data-region="both">🌐 Ambele</button>
+          <button data-region="other">✏️ Altă țară</button>
+        </div>
+        <input type="text" id="otherCountry" placeholder="Scrie țara (ex: Germania, Italia)">
+      </div>
+      <div class="ctrl">
+        <label>📖 Unde citești răspunsul</label>
+        <div class="segmented seg3" id="deviceSeg">
+          <button data-device="android">📱 Android</button>
+          <button data-device="iphone">🍎 iPhone</button>
+          <button data-device="desktop">💻 Desktop</button>
+        </div>
+        <label class="chk-row"><input type="checkbox" id="audioFriendly"> 🔊 Prietenos pentru narator (numere scrise în litere)</label>
+      </div>
+      <div class="ctrl">
+        <label>🗣️ Limba răspunsului</label>
+        <div class="segmented seg3" id="langSeg">
+          <button data-lang="ro">🇷🇴 Română</button>
+          <button data-lang="en">🇬🇧 English</button>
+          <button data-lang="it">🇮🇹 Italiană</button>
+          <button data-lang="es">🇪🇸 Spaniolă</button>
+          <button data-lang="fr">🇫🇷 Franceză</button>
+          <button data-lang="de">🇩🇪 Germană</button>
+        </div>
+        <label class="chk-row"><input type="checkbox" id="learnMode"> 🎓 Mod învățare — glosar cu traducere în română</label>
+      </div>
+      <div class="ctrl">
+        <label>🧩 Opțiuni extra</label>
+        <label class="chk-row"><input type="checkbox" id="friendVersion"> 👥 Versiune curată de trimis prietenilor (titlu + bloc de cod)</label>
+      </div>
+    </div>
+    <button class="generate" id="genBtn" style="margin-top:14px;">⚡ Generează promptul optimizat</button>
+  </section>
+
+  <!-- OUTPUT -->
+  <section class="card">
+    <div class="lbl">🚀 Prompt optimizat <span class="hint">gata de lipit în orice AI</span></div>
+    <textarea id="output" placeholder="Aici apare promptul complet, învelit în șablonul expert (surse + anti-halucinație + proactivitate + linkuri)..."></textarea>
+    <div class="meta"><div class="count" id="count-output"></div></div>
+    <div class="toolbar" data-for="output">
+      <button class="tbtn" data-act="mic" title="Dictează">🎤</button>
+      <button class="tbtn" data-act="copy" title="Copiază">📋</button>
+      <button class="tbtn" data-act="clear" title="Șterge">🗑️</button>
+      <button class="tbtn" data-act="undo" title="Înapoi">↩️</button>
+      <button class="tbtn" data-act="redo" title="Înainte">↪️</button>
+      <button class="tbtn" data-act="share" title="Trimite">📤</button>
+    </div>
+  </section>
+
+  <!-- VERSIUNE: schimbă doar numărul de mai jos (v3 → v4 → v5...) la fiecare urcare nouă pe GitHub -->
+  <p class="copyright">🏷️ v3 · © 2026 Sebastian Florin · Toate drepturile rezervate</p>
+
+</main>
+
+<!-- FAB NOTITE -->
+<button class="fab" id="fab">📝 Notițe <span class="badge" id="fabBadge"></span></button>
+
+<!-- BOTTOM SHEET NOTITE -->
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet" data-state="closed">
+  <div class="grip" id="grip"><span></span></div>
+  <div class="sheet-head">
+    <b>📝 Scratchpad</b>
+    <div class="count" id="count-notes" style="margin-left:auto;"></div>
+  </div>
+  <div class="sheet-body">
+    <textarea id="notes" placeholder="Idei spontane, cifre, tot ce nu vrei să pierzi... se salvează singur."></textarea>
+    <div class="toolbar" data-for="notes">
+      <button class="tbtn" data-act="mic" title="Dictează">🎤</button>
+      <button class="tbtn" data-act="copy" title="Copiază">📋</button>
+      <button class="tbtn" data-act="clear" title="Șterge">🗑️</button>
+      <button class="tbtn" data-act="undo" title="Înapoi">↩️</button>
+      <button class="tbtn" data-act="redo" title="Înainte">↪️</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GHID -->
+<div class="modal-back" id="guideBack">
+  <div class="modal">
+    <div class="modal-top">
+      <h3>📘 Ghid complet</h3>
+      <button class="tbtn" id="guideCopy" title="Copiază ghidul">📋</button>
+      <button class="tbtn" id="guideClose" title="Închide">✕</button>
+    </div>
+    <div class="modal-scroll" id="guideBody">
+      <p class="warn">⚠️ IMPORTANT: Microfonul 🎤 din aplicație funcționează doar pe DESKTOP / calculator. Pe TELEFON nu merge — folosește microfonul de la tastatura telefonului (butonul 🎤 de lângă bara de spațiu), care scrie la fel de bine în orice căsuță.</p>
+      <p><b>Aceasta este o aplicație web, cu link propriu.</b> O deschizi oricând din link — nu trebuie s-o salvezi ca fișier. Ca s-o ai ca iconiță pe ecranul telefonului (și s-o deschizi cu un tap, ca pe orice aplicație), vezi mai jos.</p>
+
+      <details class="expl">
+        <summary>👉 Nu ești tehnic? Apasă aici — îți explic pas cu pas, simplu de tot</summary>
+        <div>
+          <p>Ca s-o ai mereu la îndemână, pune-o ca iconiță pe ecran — se face o singură dată:</p>
+          <p><b>Pe Android (Chrome):</b></p>
+          <ol>
+            <li>Deschide linkul aplicației în <b>Chrome</b>.</li>
+            <li>Apasă pe cele <b>trei puncte (⋮)</b> din colțul din dreapta sus.</li>
+            <li>Alege <b>„Adaugă la ecranul principal”</b> (sau „Add to Home screen”).</li>
+            <li>Apasă <b>„Adaugă”</b>. Gata — apare o iconiță pe ecran, ca la orice aplicație.</li>
+          </ol>
+          <p><b>Pe iPhone (Safari):</b></p>
+          <ol>
+            <li>Deschide linkul în <b>Safari</b>.</li>
+            <li>Apasă butonul <b>Share</b> (pătratul cu săgeată în sus, jos pe ecran).</li>
+            <li>Derulează și alege <b>„Adaugă pe ecranul principal”</b>.</li>
+            <li>Apasă <b>„Adaugă”</b>. Iconița apare pe ecran.</li>
+          </ol>
+          <p>De acum apeși pe iconiță și aplicația se deschide direct, fără să mai cauți linkul.</p>
+        </div>
+      </details>
+
+      <p><b>Ce face aplicația:</b> transformă o idee scurtă într-un prompt profesionist, gata de lipit în orice AI (ChatGPT, Claude, Gemini). Promptul obligă AI-ul să verifice pe surse, să nu inventeze (anti-halucinație), să fie proactiv și să-ți dea linkuri și resurse utile.</p>
+
+      <p><b>Cum se folosește — pas cu pas:</b></p>
+      <ol>
+        <li><b>Scrie ideea</b> în prima căsuță. Poți lipi și un link (pagină web sau YouTube) — AI-ul îl va rezuma.</li>
+        <li><b>Reglează opțiunile</b> de mai jos (domeniu, monedă, regiune, limbă etc.). Se salvează singure.</li>
+        <li>Apasă <b>⚡ Generează</b> — apare promptul complet.</li>
+        <li>Apasă <b>📋 Copiază</b> (sau <b>📤 Trimite</b>) și lipește-l în AI-ul tău.</li>
+      </ol>
+
+      <p><b>Ce face fiecare buton și opțiune:</b></p>
+      <ol>
+        <li><b>🎤 Microfon</b> — dictezi vocal în loc să scrii. Atenție: merge doar pe <b>desktop / calculator</b>. Pe <b>telefon nu funcționează</b> — folosește microfonul de la tastatura telefonului.</li>
+        <li><b>🎯 Domeniu</b> — îi spui AI-ului pe ce domeniu ești, ca să folosească sursele de referință corecte:
+          <ul>
+            <li><b>PubMed</b> — cea mai mare bază de articole medicale verificate (pentru medicină / sănătate).</li>
+            <li><b>Cochrane</b> — sinteze medicale de încredere (studii analizate riguros).</li>
+            <li><b>arXiv</b> — arhivă de lucrări științifice și tehnice (fizică, IT, matematică).</li>
+            <li><b>ASM Handbook</b> — referința standard în metalurgie și tratamente termice.</li>
+            <li><b>ISO / EN, IEEE</b> — standarde de inginerie și electronică.</li>
+            <li><b>DVSA, ore de condus UE, tahograf</b> — reglementări pentru transport / HGV.</li>
+            <li><b>IFRS</b> — standarde contabile pentru partea financiară.</li>
+          </ul>
+        </li>
+        <li><b>💱 Monedă</b> — în ce monedă să-ți dea prețurile: doar LEI, doar GBP (£) sau mix LEI/GBP/EUR.</li>
+        <li><b>🌍 Regiune linkuri</b> — din ce țară să-ți dea linkurile de cumpărare: România, UK, ambele sau o altă țară (scrisă manual).</li>
+        <li><b>📖 Unde citești</b> — formatează răspunsul pentru <b>telefon</b> (coloană îngustă, fără scroll stânga-dreapta) sau <b>desktop</b> (tabele, formatare mai lată).</li>
+        <li><b>🔊 Narator</b> — scrie numerele în litere, ca cititorul vocal (text-to-speech) să le pronunțe corect, nu cifră cu cifră.</li>
+        <li><b>🗣️ Limba răspunsului</b> — în ce limbă răspunde AI-ul: română, engleză, italiană, spaniolă, franceză sau germană.</li>
+        <li><b>🎓 Mod învățare</b> — când răspunsul e în altă limbă, adaugă la final un mini-glosar cu cuvinte cheie și traducerea în română.</li>
+        <li><b>👥 Versiune de trimis prietenilor</b> — pe lângă răspuns, îți dă și o variantă curată, cu titlu, într-un bloc de cod (terminal), gata de copiat și trimis, fără instrucțiuni de șters.</li>
+        <li><b>⚡ Generează</b> — creează promptul final din tot ce ai reglat.</li>
+        <li><b>Bara de unelte</b> (sub fiecare căsuță): <b>📋 Copiază</b>, <b>🗑️ Șterge</b>, <b>↩️ Înapoi</b>, <b>↪️ Înainte</b>, <b>📤 Trimite</b>.</li>
+        <li><b>📝 Notițe</b> — sertar de jos pentru idei rapide; trage de mâner sus/jos, se salvează singur.</li>
+        <li><b>☀️ 🌙 🌊 🌲 Teme</b> — patru scheme de culoare (selectorul din dreapta sus).</li>
+      </ol>
+
+      <p><b>Bonus automat:</b> dacă lipești un link în căsuța de idee, AI-ul îl rezumă, îți spune cât e de credibil (ce e corect, ce e exagerat sau fals), ce ai de învățat și îți dă alternative mai bune. Pentru linkuri YouTube primești rezumat pe puncte al videoclipului. Răspunsul vine mereu <b>scurt sus</b> (esența) și cu <b>detalii mai jos</b>, dacă ai timp de citit.</p>
+
+      <p><b>Cum o pui pe ecranul telefonului:</b> aplicația e găzduită online și are un link propriu, deci o adaugi pe ecran ca iconiță din meniul browserului — „Adaugă la ecranul principal” (pașii simpli sunt mai sus, la „Nu ești tehnic?”). O deschizi apoi cu un tap, ca pe orice aplicație.</p>
+      <p><b>De reținut:</b></p>
+      <ul>
+        <li>🎤 Microfonul din aplicație merge doar pe desktop / calculator. Pe telefon folosește microfonul de la tastatură.</li>
+        <li>Notițele și setările se salvează în browserul de pe dispozitivul tău. Dacă schimbi telefonul sau ștergi datele browserului, notițele vechi se pierd (aplicația rămâne, doar notele locale nu se mută).</li>
+        <li>Fiind o pagină publică, oricine are linkul o poate deschide — nu scrie în ea date pe care nu vrei să le vadă alții.</li>
+      </ul>
+      <p><b>De ce e făcută așa (un fișier găzduit online), și nu aplicație nativă:</b> o aplicație din Google Play / App Store e mult mai mult de lucru și vine cu costuri și birocrație — cont de dezvoltator (Google: taxă unică ~25$; Apple: ~99$ pe an), aprobare în magazin, actualizări obligatorii, întreținere. Varianta noastră e găzduită gratuit (GitHub Pages), are link propriu de trimis oricui, se deschide instant pe orice telefon și o poți adăuga ca iconiță pe ecran. E cel mai rapid și mai ieftin mod de a avea aplicația la îndemână.</p>
+      <p><b>Costuri:</b></p>
+      <ul>
+        <li><b>Aplicația în sine: 0 lei</b> — găzduită gratuit (GitHub Pages), fără server plătit și fără abonament.</li>
+        <li>O variantă nativă ar fi însemnat taxele de dezvoltator de mai sus, plus timp de lucru și întreținere pe termen lung.</li>
+        <li>Separat: AI-ul în care lipești promptul poate avea abonament propriu (ex. ChatGPT Plus) — dar acela nu ține de aplicația noastră.</li>
+      </ul>
+      <p class="sub">Tot ce scrii (idee, prompt, notițe) și toate setările se salvează automat — nu le pierzi la refresh.</p>
+      <button class="close" id="guideCloseBtn">Am înțeles</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ============ UTILITARE ============ */
+const $ = id => document.getElementById(id);
+function haptic(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms||10); }catch(e){} } }
+let toastTimer;
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+async function copyText(str){
+  if(!str) return false;
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(str); return true; } }catch(e){}
+  try{
+    const ta = document.createElement("textarea");
+    ta.value = str; ta.setAttribute("readonly","");
+    ta.style.position="fixed"; ta.style.top="-1000px"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, str.length);
+    const ok = document.execCommand("copy"); document.body.removeChild(ta);
+    return ok;
+  }catch(e){ return false; }
+}
+
+/* ============ CAMP CU ISTORIC + AUTOSAVE ============ */
+class Field {
+  constructor(id){
+    this.el = $(id); this.key = "apo_" + id; this.countEl = $("count-" + id);
+    this.stack = [""]; this.idx = 0; this.saveTimer = null; this.pushTimer = null;
+    const saved = localStorage.getItem(this.key);
+    if(saved !== null){ this.el.value = saved; this.stack = [saved]; }
+    this.el.addEventListener("input", ()=> this.onInput());
+    this.updateCount(); this.refreshButtons();
+  }
+  onInput(){
+    clearTimeout(this.saveTimer); this.saveTimer = setTimeout(()=> this.persist(), 300);
+    clearTimeout(this.pushTimer); this.pushTimer = setTimeout(()=> this.pushState(), 450);
+    this.updateCount();
+  }
+  pushState(){
+    clearTimeout(this.pushTimer);
+    const v = this.el.value;
+    if(v === this.stack[this.idx]) return;
+    this.stack = this.stack.slice(0, this.idx + 1);
+    this.stack.push(v);
+    if(this.stack.length > 120){ this.stack.shift(); }
+    this.idx = this.stack.length - 1;
+    this.refreshButtons();
+  }
+  setValue(v){ this.pushState(); this.el.value = v; this.pushState(); this.persist(); }
+  undo(){ this.pushState(); if(this.idx > 0){ this.idx--; this.el.value = this.stack[this.idx]; this.persist(); haptic(8); } this.refreshButtons(); }
+  redo(){ if(this.idx < this.stack.length - 1){ this.idx++; this.el.value = this.stack[this.idx]; this.persist(); haptic(8); } this.refreshButtons(); }
+  clear(){ if(!this.el.value){ return; } this.setValue(""); toast("Șters"); haptic(12); }
+  async copy(btn){
+    const v = this.el.value;
+    if(!v.trim()){ toast("Nimic de copiat"); return; }
+    const ok = await copyText(v);
+    if(ok){ flash(btn); toast("Copiat ✓"); haptic(12); } else { toast("Nu am putut copia. Apasă lung pe text și copiază manual."); }
+  }
+  async share(){
+    const v = this.el.value;
+    if(!v.trim()){ toast("Nimic de trimis"); return; }
+    if(navigator.share){ try{ await navigator.share({ title:"Prompt optimizat", text:v }); haptic(12); }catch(e){} }
+    else { this.copy(); toast("Copiat (share indisponibil)"); }
+  }
+  appendText(txt){
+    txt = (txt||"").trim(); if(!txt) return;
+    const sep = this.el.value && !/\s$/.test(this.el.value) ? " " : "";
+    this.el.value = this.el.value + sep + txt;
+    this.pushState(); this.persist();
+  }
+  persist(){ localStorage.setItem(this.key, this.el.value); this.updateCount(); }
+  refreshButtons(){
+    const tb = document.querySelector('.toolbar[data-for="'+this.el.id+'"]'); if(!tb) return;
+    const u = tb.querySelector('[data-act="undo"]'), r = tb.querySelector('[data-act="redo"]');
+    if(u) u.disabled = this.idx <= 0;
+    if(r) r.disabled = this.idx >= this.stack.length - 1;
+  }
+  updateCount(){
+    if(!this.countEl) return;
+    const v = this.el.value, chars = v.length;
+    const words = v.trim() ? v.trim().split(/\s+/).length : 0;
+    this.countEl.textContent = chars + " car. · " + words + " cuv. · ≈" + Math.ceil(chars/4) + " tok.";
+  }
+}
+function flash(btn){ if(!btn) return; const old = btn.textContent; btn.classList.add("ok"); btn.textContent="✓"; setTimeout(()=>{ btn.classList.remove("ok"); btn.textContent=old; }, 900); }
+
+const fields = { input:new Field("input"), output:new Field("output"), notes:new Field("notes") };
+
+/* ============ MICROFON (Web Speech API, cu degradare) ============ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let activeRec = null, activeMicBtn = null;
+function startMic(field, btn){
+  if(!SR){ toast("Browserul nu suportă dictarea vocală. Folosește microfonul de la tastatura telefonului."); return; }
+  if(activeRec){ stopMic(); if(activeMicBtn === btn){ return; } }
+  let rec;
+  try{ rec = new SR(); }catch(e){ toast("Nu am putut porni dictarea."); return; }
+  rec.lang = "ro-RO"; rec.interimResults = false; rec.continuous = false; rec.maxAlternatives = 1;
+  rec.onresult = e=>{ let t=""; for(let i=e.resultIndex;i<e.results.length;i++){ t += e.results[i][0].transcript; } field.appendText(t); haptic(10); };
+  rec.onerror = e=>{
+    let m = "Eroare la dictare.";
+    if(e.error==="not-allowed"||e.error==="service-not-allowed") m = "Microfonul e blocat aici (pe telefon de obicei nu merge). Folosește microfonul de la tastatura telefonului.";
+    else if(e.error==="network") m = "Dictarea are nevoie de internet. Conectează-te sau folosește microfonul tastaturii.";
+    else if(e.error==="no-speech") m = "Nu am auzit nimic. Mai încearcă.";
+    else if(e.error==="audio-capture") m = "Nu găsesc microfonul pe dispozitiv.";
+    toast(m); stopMic();
+  };
+  rec.onend = ()=>{ if(activeMicBtn) activeMicBtn.classList.remove("rec"); activeRec=null; activeMicBtn=null; };
+  try{ rec.start(); }catch(err){ toast("Nu am putut porni dictarea. Încearcă din nou."); return; }
+  activeRec = rec; activeMicBtn = btn; btn.classList.add("rec"); haptic(12);
+  toast("Ascult... vorbește 🎤 (apasă din nou ca să oprești)");
+}
+function stopMic(){ if(activeRec){ try{ activeRec.stop(); }catch(e){} } if(activeMicBtn) activeMicBtn.classList.remove("rec"); activeRec=null; activeMicBtn=null; }
+if(!SR){ document.querySelectorAll('[data-act="mic"]').forEach(b=> b.classList.add("muted")); }
+
+/* ============ TOOLBAR ============ */
+document.querySelectorAll(".toolbar").forEach(tb=>{
+  const key = tb.getAttribute("data-for");
+  tb.addEventListener("click", e=>{
+    const b = e.target.closest(".tbtn"); if(!b) return;
+    const act = b.getAttribute("data-act"), f = fields[key];
+    if(act==="copy") f.copy(b);
+    else if(act==="clear") f.clear();
+    else if(act==="undo") f.undo();
+    else if(act==="redo") f.redo();
+    else if(act==="share") f.share();
+    else if(act==="mic"){ if(activeMicBtn===b){ stopMic(); } else { startMic(f,b); } }
+  });
+});
+
+/* ============ REGIUNE LINKURI ============ */
+let currentRegion = localStorage.getItem("apo_region") || "ro";
+const otherInput = $("otherCountry");
+if(localStorage.getItem("apo_country")) otherInput.value = localStorage.getItem("apo_country");
+function applyRegionUI(){
+  document.querySelectorAll("#regionSeg button").forEach(b=> b.classList.toggle("active", b.dataset.region===currentRegion));
+  otherInput.style.display = currentRegion==="other" ? "block" : "none";
+}
+document.querySelectorAll("#regionSeg button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    currentRegion = b.dataset.region; localStorage.setItem("apo_region", currentRegion);
+    applyRegionUI(); haptic(8); if(currentRegion==="other") otherInput.focus();
+  });
+});
+otherInput.addEventListener("input", ()=> localStorage.setItem("apo_country", otherInput.value));
+applyRegionUI();
+function regionText(){
+  if(currentRegion==="ro") return "România";
+  if(currentRegion==="uk") return "Regatul Unit (UK)";
+  if(currentRegion==="both") return "România și Regatul Unit (UK)";
+  if(currentRegion==="other"){ const c = otherInput.value.trim(); return c || "țara indicată de utilizator"; }
+  return "România";
+}
+
+/* ============ DISPOZITIV + AUDIO ============ */
+let currentDevice = localStorage.getItem("apo_device") || "android";
+function applyDeviceUI(){ document.querySelectorAll("#deviceSeg button").forEach(b=> b.classList.toggle("active", b.dataset.device===currentDevice)); }
+document.querySelectorAll("#deviceSeg button").forEach(b=>{
+  b.addEventListener("click", ()=>{ currentDevice=b.dataset.device; localStorage.setItem("apo_device",currentDevice); applyDeviceUI(); haptic(8); });
+});
+applyDeviceUI();
+const audioChk = $("audioFriendly");
+audioChk.checked = localStorage.getItem("apo_audio") !== "0"; // implicit pornit
+audioChk.addEventListener("change", ()=>{ localStorage.setItem("apo_audio", audioChk.checked ? "1" : "0"); haptic(6); });
+function deviceInfo(){
+  const phone = currentDevice==="android" || currentDevice==="iphone";
+  const name = currentDevice==="android" ? "telefon Android" : currentDevice==="iphone" ? "iPhone" : "desktop / laptop / calculator";
+  return { phone, name };
+}
+
+/* ============ LIMBA + MOD INVATARE ============ */
+const LANG_NAME = { ro:"română", en:"engleză", it:"italiană", es:"spaniolă", fr:"franceză", de:"germană" };
+let currentLang = localStorage.getItem("apo_lang") || "ro";
+const learnChk = $("learnMode");
+function updateLearnVisibility(){ const row = learnChk.closest(".chk-row"); if(row) row.style.display = currentLang==="ro" ? "none" : "flex"; }
+function applyLangUI(){ document.querySelectorAll("#langSeg button").forEach(b=> b.classList.toggle("active", b.dataset.lang===currentLang)); updateLearnVisibility(); }
+document.querySelectorAll("#langSeg button").forEach(b=>{
+  b.addEventListener("click", ()=>{ currentLang=b.dataset.lang; localStorage.setItem("apo_lang",currentLang); applyLangUI(); haptic(8); });
+});
+learnChk.checked = localStorage.getItem("apo_learn") === "1";
+learnChk.addEventListener("change", ()=>{ localStorage.setItem("apo_learn", learnChk.checked ? "1" : "0"); haptic(6); });
+applyLangUI();
+
+/* ============ VERSIUNE PRIETENI + DETECTARE LINKURI ============ */
+const friendChk = $("friendVersion");
+friendChk.checked = localStorage.getItem("apo_friend") === "1";
+friendChk.addEventListener("change", ()=>{ localStorage.setItem("apo_friend", friendChk.checked ? "1" : "0"); haptic(6); });
+function detectLinks(text){
+  const urls = text.match(/https?:\/\/[^\s]+/gi) || [];
+  return { hasUrl: urls.length > 0, isYT: urls.some(u=>/youtube\.com|youtu\.be/i.test(u)) };
+}
+
+/* ============ COPIERE GHID ============ */
+$("guideCopy").addEventListener("click", async ()=>{
+  const body = $("guideBody");
+  const det = body.querySelectorAll("details");
+  const prev = [...det].map(d=>d.open);
+  det.forEach(d=> d.open = true);          // deschide temporar ca să prindem tot textul
+  const txt = body.innerText;
+  det.forEach((d,i)=> d.open = prev[i]);   // restaurează starea
+  const ok = await copyText(txt);
+  toast(ok ? "Ghid copiat ✓" : "Nu am putut copia. Apasă lung pe text și copiază manual.");
+  haptic(10);
+});
+
+/* ============ MOTOR DE PROMPT ============ */
+const DOMAINS = {
+  auto:      { name:"domeniul detectat automat din cerere", src:"sursele primare potrivite domeniului (ex: PubMed, arXiv, standarde tehnice, legislație în vigoare)" },
+  medical:   { name:"Medical / Sănătate", src:"PubMed, Cochrane, ghiduri clinice (WHO, NICE, ESC)" },
+  eng:       { name:"Inginerie / Tehnic", src:"standarde ISO/EN, IEEE, manuale de inginerie, fișe tehnice ale producătorului" },
+  metal:     { name:"Metalurgie / Tratamente Termice", src:"ASM Handbook, standarde ISO/EN pentru oțeluri, diagrame TTT/CCT, fișe tehnice ale materialelor (compoziție, duritate, temperaturi de tratament)" },
+  it:        { name:"IT / Programare", src:"documentația oficială, MDN, RFC-uri, arXiv, repository-uri oficiale" },
+  legal:     { name:"Juridic", src:"legislația în vigoare, coduri, jurisprudență relevantă (verifică valabilitatea la zi)" },
+  finance:   { name:"Financiar / Business", src:"rapoarte oficiale, date de piață, standarde contabile (IFRS)" },
+  science:   { name:"Științific / Cercetare", src:"arXiv, jurnale peer-reviewed, Google Scholar" },
+  transport: { name:"Transport / HGV / Logistică", src:"reglementări DVSA, regulile UE privind orele de condus, cerințele tahograf, manuale tehnice ale producătorului" },
+  general:   { name:"General", src:"surse primare verificabile și citabile" }
+};
+const CURRENCY = {
+  none: "",
+  lei:  "MONEDĂ: Exprimă toate estimările financiare exclusiv în LEI (RON).",
+  gbp:  "MONEDĂ: Exprimă toate estimările financiare exclusiv în GBP (£).",
+  mix:  "MONEDĂ: Exprimă estimările financiare în format mixt — LEI (RON), GBP (£) și EUR (€) — și menționează cursul aproximativ folosit."
+};
+
+function buildPrompt(){
+  const raw = fields.input.el.value.trim();
+  if(!raw){ toast("Scrie mai întâi o idee ✍️"); haptic(20); return; }
+  const d = DOMAINS[$("domainSel").value] || DOMAINS.auto;
+  const cur = CURRENCY[$("currencySel").value] || "";
+  const region = regionText();
+  const dev = deviceInfo();
+  const audio = audioChk.checked;
+
+  const rulesArr = [
+    "VERIFICARE PE SURSE: Bazează-ți afirmațiile pe surse de referință credibile (" + d.src + "). Când folosești o cifră, o normă sau un fapt, indică sursa sau standardul pe care te sprijini.",
+    "ZERO HALUCINAȚII — FAPTE vs INFERENȚE: Separă clar faptele verificabile de inferențele/estimările tale (marchează-le ca atare). Dacă nu ești sigur, spune „Nu am date verificate despre asta” în loc să inventezi. Nu fabrica citate, statistici, nume de studii, standarde sau linkuri.",
+    "PROACTIVITATE: Nu răspunde doar la ce s-a cerut. La final, oferă între 3 și 7 propuneri proactive concrete — probleme nesesizate, riscuri, alternative mai bune și optimizări utile.",
+    "COD: Dacă răspunsul conține cod, scrie-l într-un bloc de cod (terminal), curat și gata de copiat, fără text sau explicații amestecate printre linii.",
+    "LA CE SĂ FIU ATENT: Când mă înveți ceva sau când caut un produs ori un domeniu, spune-mi clar la ce să fiu atent — criteriile de ales, capcanele frecvente, semnele de calitate sau de înșelătorie și întrebările pe care să le pun înainte să cumpăr sau să mă decid."
+  ];
+  if(cur) rulesArr.push(cur);
+  rulesArr.push("STRUCTURĂ CLARĂ: Începe cu concluzia/recomandarea principală, apoi detaliază. Folosește titluri, pași și tabele acolo unde ajută.");
+  if(currentLang === "ro"){
+    rulesArr.push("LIMBĂ: Răspunde în limba română, direct și fără limbaj academic inutil.");
+  } else {
+    rulesArr.push("LIMBĂ: Răspunde EXCLUSIV în limba " + LANG_NAME[currentLang] + " (nu în română), clar și fără limbaj academic inutil.");
+  }
+  const rules = rulesArr.map((r,i)=> (i+1) + ". " + r).join("\n");
+
+  const links =
+"# LINKURI ȘI RESURSE\n" +
+"- Detectează automat ce am nevoie:\n" +
+"  • Dacă cer un PRODUS de cumpărat → dă-mi linkuri către magazine relevante din: " + region + ", cu prețuri" + (cur ? " (respectă regula de MONEDĂ de mai sus)" : "") + ".\n" +
+"  • Dacă e o temă TEHNICĂ sau de ÎNVĂȚAT → dă-mi linkuri către documentație oficială, surse citabile, cursuri sau tutoriale de calitate.\n" +
+"- ANTI-HALUCINAȚIE LA LINKURI: oferă URL-uri concrete DOAR dacă ai acces web live și le poți verifica. Dacă NU ai acces web, NU inventa URL-uri sau prețuri — dă în schimb numele magazinelor/surselor și termenii exacți de căutare pe care să-i folosesc.";
+
+  let disp = "# FORMAT DE AFIȘARE ȘI CITIRE\n- Voi citi răspunsul pe: " + dev.name + ".\n";
+  if(dev.phone){
+    disp += "- FORMAT PENTRU TELEFON: scrie pe o singură coloană îngustă, cu rânduri și propoziții scurte. NU folosi tabele late — transformă orice tabel în listă verticală, ca să NU fiu obligat să derulez stânga-dreapta. Evită liniile lungi pe orizontală; dacă dai cod, rupe-l pe linii scurte.\n";
+  } else {
+    disp += "- FORMAT PENTRU DESKTOP: am spațiu pe orizontală — poți folosi tabele și o formatare mai largă acolo unde ajută.\n";
+  }
+  if(audio){
+    disp += "- PRIETENOS PENTRU ASCULTARE (narator / cititor de ecran): scrie clar și cursiv, ușor de ascultat cu voce. Scrie numerele în litere, în limba răspunsului, ca naratorul să le pronunțe corect, nu cifră cu cifră (ex: „3500” → „trei mii cinci sute”). La sume pune și cifra, și forma în litere. Evită abrevieri și simboluri care sună ciudat citite cu voce.\n";
+  }
+  disp = disp.replace(/\n$/, "");
+
+  let learn = "";
+  if(learnChk.checked && currentLang !== "ro"){
+    learn = "# MOD ÎNVĂȚARE\n- La finalul răspunsului, adaugă un mini-glosar cu 5-10 cuvinte sau expresii cheie folosite (în limba " + LANG_NAME[currentLang] + "), fiecare cu traducerea în română. Scop: să învăț treptat limba.";
+  }
+
+  const lk = detectLinks(raw);
+  let linkBlock = "";
+  if(lk.hasUrl){
+    linkBlock =
+"# LINK ATAȘAT\n" +
+"- Cererea conține un link. Fă un rezumat clar al conținutului lui, apoi dă concluziile.\n" +
+"- Evaluează credibilitatea: spune ce pare corect, ce pare exagerat sau fals și pe ce te bazezi.\n" +
+"- Spune clar CE AM DE ÎNVĂȚAT, ce merită reținut și cu ce mă ajută practic.\n" +
+"- Oferă și ALTERNATIVE mai bune (surse, unelte sau metode), dacă există.\n" +
+"- Dacă NU ai acces la conținutul linkului, spune-mi asta clar și NU inventa rezumatul — nu ghici ce e în el.";
+  }
+  let ytBlock = "";
+  if(lk.isYT){
+    ytBlock =
+"# LINK VIDEO (YOUTUBE)\n" +
+"- Rezumă pe puncte ideile principale ale videoclipului, în ordine logică.\n" +
+"- Dacă ai acces, marchează momentele/segmentele importante.\n" +
+"- Verifică credibilitatea: ce afirmații sunt corecte, ce e senzaționalism sau fals și de ce.\n" +
+"- Spune ce trebuie reținut, ce învăț și cu ce mă ajută concret.\n" +
+"- Recomandă surse sau alternative mai bune dacă subiectul merită aprofundat.";
+  }
+  let friend = "";
+  if(friendChk.checked){
+    friend =
+"# VERSIUNE DE TRIMIS PRIETENILOR\n" +
+"- La final, dă-mi și o VERSIUNE CURATĂ, gata de trimis, scrisă într-un bloc de cod (terminal), ca s-o pot copia dintr-o mișcare.\n" +
+"- Are un TITLU clar la început și conține DOAR informația utilă pentru prieteni — fără instrucțiuni, fără note tehnice, fără meta-comentarii.";
+  }
+
+  const prompt =
+"# ROL\n" +
+"Ești un consultant expert de nivel senior, specializat pe: " + d.name + ". Te comporți ca un profesionist riguros cu acces la cunoștințe verificabile, nu ca un asistent generic.\n\n" +
+"# SARCINA UTILIZATORULUI\n" + raw + "\n\n" +
+"# REGULI OBLIGATORII DE EXECUȚIE\n" + rules + "\n\n" +
+links + "\n\n" +
+(linkBlock ? linkBlock + "\n\n" : "") +
+(ytBlock ? ytBlock + "\n\n" : "") +
+disp + "\n\n" +
+(learn ? learn + "\n\n" : "") +
+(friend ? friend + "\n\n" : "") +
+"# FORMAT AȘTEPTAT\n" +
+"- PE SCURT (sus de tot): 2-4 rânduri cu esența, la obiect. Închide partea scurtă cu invitația: «Dacă vrei mai în profunzime și ai timp, citește mai jos.»\n" +
+"- DETALII (mai jos): detaliere și argumentare, pentru cine vrea mai mult.\n" +
+"- Riscuri și capcane de evitat\n" +
+"- Linkuri / resurse (după regulile de mai sus)\n" +
+"- Optimizări extra și ALTERNATIVE mai bune (proactive)\n" +
+"- Surse / standarde folosite\n\n" +
+"Dacă cererea e ambiguă, pune întâi 1–3 întrebări de clarificare esențiale, apoi continuă.";
+
+  fields.output.setValue(prompt);
+  toast("Prompt generat ✓"); haptic(15);
+  $("output").scrollIntoView({ behavior:"smooth", block:"center" });
+}
+$("genBtn").addEventListener("click", buildPrompt);
+
+/* ============ TEME + SETARI PERSISTENTE ============ */
+const themeSel = $("themeSel");
+const savedTheme = localStorage.getItem("apo_theme");
+if(savedTheme){ document.documentElement.setAttribute("data-theme", savedTheme); themeSel.value = savedTheme; }
+themeSel.addEventListener("change", ()=>{ document.documentElement.setAttribute("data-theme", themeSel.value); localStorage.setItem("apo_theme", themeSel.value); haptic(8); });
+["domainSel","currencySel"].forEach(id=>{
+  const el = $(id), k = "apo_" + id, s = localStorage.getItem(k);
+  if(s !== null) el.value = s;
+  el.addEventListener("change", ()=>{ localStorage.setItem(k, el.value); haptic(6); });
+});
+
+/* ============ GHID ============ */
+function closeGuide(){ $("guideBack").classList.remove("show"); }
+$("guideBtn").addEventListener("click", ()=>{ $("guideBack").classList.add("show"); haptic(8); });
+$("guideClose").addEventListener("click", closeGuide);
+$("guideCloseBtn").addEventListener("click", closeGuide);
+$("guideBack").addEventListener("click", e=>{ if(e.target===$("guideBack")) closeGuide(); });
+
+/* ============ BOTTOM SHEET (3 stari + drag) ============ */
+const sheet = $("sheet"), backdrop = $("backdrop"), grip = $("grip"), fab = $("fab");
+let sheetState = "closed";
+const STATES = { closed:1, peek:0.66, expanded:0 };
+function setSheet(state){
+  sheetState = state; sheet.style.transition = ""; sheet.style.transform = "";
+  sheet.setAttribute("data-state", state);
+  backdrop.classList.toggle("show", state === "expanded");
+  fab.style.opacity = (state === "closed") ? "1" : "0";
+  fab.style.pointerEvents = (state === "closed") ? "auto" : "none";
+}
+fab.addEventListener("click", ()=>{ setSheet("peek"); haptic(10); $("notes").focus({preventScroll:true}); });
+grip.addEventListener("click", ()=>{ setSheet(sheetState==="expanded" ? "peek" : "expanded"); haptic(8); });
+backdrop.addEventListener("click", ()=> setSheet("peek"));
+let dragging=false, startY=0, baseFrac=1, sheetH=0;
+function onDown(y){ dragging=true; startY=y; sheetH=sheet.offsetHeight; baseFrac=STATES[sheetState]; sheet.style.transition="none"; }
+function onMove(y){ if(!dragging) return; let frac = baseFrac + ((y-startY)/sheetH); frac=Math.max(0,Math.min(1,frac)); sheet.style.transform="translateY("+(frac*100)+"%)"; }
+function onUp(y){ if(!dragging) return; dragging=false; let frac=Math.max(0,Math.min(1, baseFrac+((y-startY)/sheetH))); let best="peek",bd=9; for(const s in STATES){ const dd=Math.abs(STATES[s]-frac); if(dd<bd){ bd=dd; best=s; } } setSheet(best); }
+grip.addEventListener("touchstart", e=>{ onDown(e.touches[0].clientY); }, {passive:true});
+grip.addEventListener("touchmove",  e=>{ onMove(e.touches[0].clientY); }, {passive:true});
+grip.addEventListener("touchend",   e=>{ onUp(e.changedTouches[0].clientY); });
+grip.addEventListener("mousedown", e=>{ onDown(e.clientY);
+  const mm=ev=>onMove(ev.clientY), mu=ev=>{ onUp(ev.clientY); document.removeEventListener("mousemove",mm); document.removeEventListener("mouseup",mu); };
+  document.addEventListener("mousemove",mm); document.addEventListener("mouseup",mu);
+});
+function updateFabBadge(){ const n=$("notes").value.trim().length; $("fabBadge").textContent = n ? "("+n+")" : ""; }
+$("notes").addEventListener("input", updateFabBadge);
+updateFabBadge();
+</script>
+</body>
+</html>
