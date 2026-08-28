@@ -169,6 +169,9 @@
   .grip{ padding:10px 0 4px; display:flex; justify-content:center; cursor:grab; }
   .grip span{ width:44px; height:5px; border-radius:3px; background:var(--muted); opacity:.5; }
   .sheet-head{ display:flex; align-items:center; gap:8px; padding:2px 16px 8px; }
+  .sheet-actions{ display:flex; gap:8px; }
+  .sheet-btn{ min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; background:var(--btn); color:var(--text); border:1px solid var(--btn-border); border-radius:10px; font-size:1.05rem; cursor:pointer; transition:transform .08s; }
+  .sheet-btn:active{ transform:scale(.92); }
   .sheet-head b{ font-size:1rem; }
   .sheet-body{ flex:1; display:flex; flex-direction:column; padding:0 14px 14px; overflow:hidden; }
   #notes{ flex:1; min-height:0; resize:none; }
@@ -327,7 +330,7 @@
   </section>
 
   <!-- VERSIUNE: schimbă doar numărul de mai jos (v3 → v4 → v5...) la fiecare urcare nouă pe GitHub -->
-  <p class="copyright">🏷️ v3 · © 2026 Sebastian Florin · Toate drepturile rezervate</p>
+  <p class="copyright">🏷️ v4 · © 2026 Sebastian Florin · Toate drepturile rezervate</p>
 
 </main>
 
@@ -341,6 +344,10 @@
   <div class="sheet-head">
     <b>📝 Scratchpad</b>
     <div class="count" id="count-notes" style="margin-left:auto;"></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn" id="sheetToggle" title="Mărește pe tot ecranul">▲</button>
+      <button class="sheet-btn" id="sheetClose" title="Închide">✕</button>
+    </div>
   </div>
   <div class="sheet-body">
     <textarea id="notes" placeholder="Idei spontane, cifre, tot ce nu vrei să pierzi... se salvează singur."></textarea>
@@ -805,9 +812,13 @@ function setSheet(state){
   backdrop.classList.toggle("show", state === "expanded");
   fab.style.opacity = (state === "closed") ? "1" : "0";
   fab.style.pointerEvents = (state === "closed") ? "auto" : "none";
+  const tg = document.getElementById("sheetToggle");
+  if(tg){ tg.textContent = state === "expanded" ? "▼" : "▲"; tg.title = state === "expanded" ? "Micșorează la jumătate" : "Mărește pe tot ecranul"; }
 }
 fab.addEventListener("click", ()=>{ setSheet("peek"); haptic(10); $("notes").focus({preventScroll:true}); });
 grip.addEventListener("click", ()=>{ setSheet(sheetState==="expanded" ? "peek" : "expanded"); haptic(8); });
+$("sheetToggle").addEventListener("click", ()=>{ setSheet(sheetState==="expanded" ? "peek" : "expanded"); haptic(8); });
+$("sheetClose").addEventListener("click", ()=>{ setSheet("closed"); haptic(8); });
 backdrop.addEventListener("click", ()=> setSheet("peek"));
 let dragging=false, startY=0, baseFrac=1, sheetH=0;
 function onDown(y){ dragging=true; startY=y; sheetH=sheet.offsetHeight; baseFrac=STATES[sheetState]; sheet.style.transition="none"; }
