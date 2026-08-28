@@ -45,6 +45,7 @@
     transition:background .25s, color .25s;
   }
   .wrap{ max-width:680px; margin:0 auto; padding:0 14px; }
+  .copyright{ text-align:center; color:var(--muted); font-size:.72rem; margin:10px 0 24px; }
 
   /* ============ HEADER ============ */
   header{
@@ -213,6 +214,7 @@
 </style>
 </head>
 <body>
+<!-- © 2026 Sebastian Florin. Toate drepturile rezervate. Cod proprietar. -->
 
 <header>
   <div class="head-inner">
@@ -324,6 +326,8 @@
     </div>
   </section>
 
+  <p class="copyright">© 2026 Sebastian Florin · Toate drepturile rezervate</p>
+
 </main>
 
 <!-- FAB NOTITE -->
@@ -358,21 +362,28 @@
       <button class="tbtn" id="guideClose" title="Închide">✕</button>
     </div>
     <div class="modal-scroll" id="guideBody">
-      <p class="warn">⚠️ IMPORTANT: SALVEAZĂ ACEASTĂ APLICAȚIE ÎN TELEFON! Este un fișier (.html). Când o deschizi în browser, NU rămâne salvată acolo — de fiecare dată trebuie să te întorci în locul unde ai salvat fișierul (de obicei folderul Descărcări / Downloads) și s-o pornești de acolo.</p>
+      <p class="warn">⚠️ IMPORTANT: Microfonul 🎤 din aplicație funcționează doar pe DESKTOP / calculator. Pe TELEFON nu merge — folosește microfonul de la tastatura telefonului (butonul 🎤 de lângă bara de spațiu), care scrie la fel de bine în orice căsuță.</p>
+      <p><b>Aceasta este o aplicație web, cu link propriu.</b> O deschizi oricând din link — nu trebuie s-o salvezi ca fișier. Ca s-o ai ca iconiță pe ecranul telefonului (și s-o deschizi cu un tap, ca pe orice aplicație), vezi mai jos.</p>
 
       <details class="expl">
         <summary>👉 Nu ești tehnic? Apasă aici — îți explic pas cu pas, simplu de tot</summary>
         <div>
-          <p>Ca să nu pierzi aplicația, fă exact așa:</p>
+          <p>Ca s-o ai mereu la îndemână, pune-o ca iconiță pe ecran — se face o singură dată:</p>
+          <p><b>Pe Android (Chrome):</b></p>
           <ol>
-            <li>Când apare fișierul, apasă pe <b>„Descarcă” / „Download”</b>. Fișierul se duce în telefon, în folderul <b>„Descărcări”</b>.</li>
-            <li>Ca să-l deschizi: intră în aplicația <b>„Fișiere”</b> sau <b>„Descărcări”</b> din telefon, caută numele fișierului și apasă o dată pe el.</li>
-            <li>Dacă te întreabă cu ce să-l deschidă, alege <b>„Chrome”</b> (pe Android) sau se deschide singur în <b>Safari</b> (pe iPhone).</li>
-            <li>Ca să-l deschizi repede data viitoare: lasă-l în folderul <b>„Descărcări”</b> și deschide-l de acolo de fiecare dată. E cel mai sigur mod pentru acest tip de fișier.</li>
+            <li>Deschide linkul aplicației în <b>Chrome</b>.</li>
+            <li>Apasă pe cele <b>trei puncte (⋮)</b> din colțul din dreapta sus.</li>
+            <li>Alege <b>„Adaugă la ecranul principal”</b> (sau „Add to Home screen”).</li>
+            <li>Apasă <b>„Adaugă”</b>. Gata — apare o iconiță pe ecran, ca la orice aplicație.</li>
           </ol>
-          <p><b>De ce NU apare „Adaugă la ecranul principal”?</b> Pentru că fișierul e salvat în telefonul tău, nu e un site cu adresă pe internet. Butonul de iconiță e făcut doar pentru site-uri web — de aceea, la un fișier deschis din „Descărcări”, opțiunea de multe ori nici nu apare în meniul cu trei puncte, iar dacă apare, scurtătura nu se deschide cum trebuie.</p>
-          <p><b>Dacă vrei totuși o iconiță adevărată pe ecran</b> (care se deschide cu un singur tap), fișierul trebuie pus pe internet, pe o adresă gratuită. Atunci „Adaugă la ecranul principal” chiar funcționează. Spune-mi și te ajut cu asta.</p>
-          <p>Dacă tot nu-l găsești: fișierul e mereu în folderul <b>„Descărcări”</b> din telefon. Nu se șterge singur — trebuie doar să-l deschizi de acolo.</p>
+          <p><b>Pe iPhone (Safari):</b></p>
+          <ol>
+            <li>Deschide linkul în <b>Safari</b>.</li>
+            <li>Apasă butonul <b>Share</b> (pătratul cu săgeată în sus, jos pe ecran).</li>
+            <li>Derulează și alege <b>„Adaugă pe ecranul principal”</b>.</li>
+            <li>Apasă <b>„Adaugă”</b>. Iconița apare pe ecran.</li>
+          </ol>
+          <p>De acum apeși pe iconiță și aplicația se deschide direct, fără să mai cauți linkul.</p>
         </div>
       </details>
 
@@ -388,7 +399,7 @@
 
       <p><b>Ce face fiecare buton și opțiune:</b></p>
       <ol>
-        <li><b>🎤 Microfon</b> — dictezi vocal în loc să scrii. Merge cel mai bine în Chrome pe Android, cu internet; altfel folosește microfonul de la tastatură.</li>
+        <li><b>🎤 Microfon</b> — dictezi vocal în loc să scrii. Atenție: merge doar pe <b>desktop / calculator</b>. Pe <b>telefon nu funcționează</b> — folosește microfonul de la tastatura telefonului.</li>
         <li><b>🎯 Domeniu</b> — îi spui AI-ului pe ce domeniu ești, ca să folosească sursele de referință corecte:
           <ul>
             <li><b>PubMed</b> — cea mai mare bază de articole medicale verificate (pentru medicină / sănătate).</li>
@@ -415,18 +426,17 @@
 
       <p><b>Bonus automat:</b> dacă lipești un link în căsuța de idee, AI-ul îl rezumă, îți spune cât e de credibil (ce e corect, ce e exagerat sau fals), ce ai de învățat și îți dă alternative mai bune. Pentru linkuri YouTube primești rezumat pe puncte al videoclipului. Răspunsul vine mereu <b>scurt sus</b> (esența) și cu <b>detalii mai jos</b>, dacă ai timp de citit.</p>
 
-      <p><b>Cum o păstrezi și de ce e un fișier:</b></p>
-      <p><b>De ce se întâmplă asta:</b> aplicația e un singur fișier care rulează local, direct pe telefonul tău, fără server pe internet. Browserul doar deschide fișierul, nu-l „ține minte” ca pe un site cu adresă. De asta trebuie pornită mereu din locul unde ai salvat-o.</p>
-      <p><b>Limitele acestui format:</b></p>
+      <p><b>Cum o pui pe ecranul telefonului:</b> aplicația e găzduită online și are un link propriu, deci o adaugi pe ecran ca iconiță din meniul browserului — „Adaugă la ecranul principal” (pașii simpli sunt mai sus, la „Nu ești tehnic?”). O deschizi apoi cu un tap, ca pe orice aplicație.</p>
+      <p><b>De reținut:</b></p>
       <ul>
-        <li>Notițele și setările se salvează în browser, legat de locul de unde deschizi fișierul. Dacă îl muți sau îl deschizi din alt browser, s-ar putea să nu mai vezi notițele vechi.</li>
-        <li>Microfonul din aplicație poate fi blocat când fișierul e local — de aceea există și microfonul de la tastatură ca rezervă.</li>
-        <li>Nu apare singură în lista de aplicații și, fiind un fișier local (nu un site cu adresă), opțiunea „Adaugă la ecranul principal” de obicei nu funcționează — îl deschizi din „Descărcări” de fiecare dată (sau îl pui online pentru o iconiță reală).</li>
+        <li>🎤 Microfonul din aplicație merge doar pe desktop / calculator. Pe telefon folosește microfonul de la tastatură.</li>
+        <li>Notițele și setările se salvează în browserul de pe dispozitivul tău. Dacă schimbi telefonul sau ștergi datele browserului, notițele vechi se pierd (aplicația rămâne, doar notele locale nu se mută).</li>
+        <li>Fiind o pagină publică, oricine are linkul o poate deschide — nu scrie în ea date pe care nu vrei să le vadă alții.</li>
       </ul>
-      <p><b>De ce am făcut-o așa, și nu ca aplicație nativă:</b> o aplicație din Google Play / App Store e mult mai mult de lucru și vine cu costuri și birocrație — cont de dezvoltator (Google: taxă unică ~25$; Apple: ~99$ pe an), aprobare în magazin, actualizări obligatorii, întreținere. Formatul de fișier unic e gratuit, merge instant, funcționează offline, îl poți copia sau trimite oricui și nu depinde de niciun magazin sau server. E cel mai rapid și mai ieftin mod de a avea aplicația la îndemână.</p>
+      <p><b>De ce e făcută așa (un fișier găzduit online), și nu aplicație nativă:</b> o aplicație din Google Play / App Store e mult mai mult de lucru și vine cu costuri și birocrație — cont de dezvoltator (Google: taxă unică ~25$; Apple: ~99$ pe an), aprobare în magazin, actualizări obligatorii, întreținere. Varianta noastră e găzduită gratuit (GitHub Pages), are link propriu de trimis oricui, se deschide instant pe orice telefon și o poți adăuga ca iconiță pe ecran. E cel mai rapid și mai ieftin mod de a avea aplicația la îndemână.</p>
       <p><b>Costuri:</b></p>
       <ul>
-        <li><b>Aplicația în sine: 0 lei</b> — e doar un fișier, fără server și fără abonament.</li>
+        <li><b>Aplicația în sine: 0 lei</b> — găzduită gratuit (GitHub Pages), fără server plătit și fără abonament.</li>
         <li>O variantă nativă ar fi însemnat taxele de dezvoltator de mai sus, plus timp de lucru și întreținere pe termen lung.</li>
         <li>Separat: AI-ul în care lipești promptul poate avea abonament propriu (ex. ChatGPT Plus) — dar acela nu ține de aplicația noastră.</li>
       </ul>
@@ -539,7 +549,7 @@ function startMic(field, btn){
   rec.onresult = e=>{ let t=""; for(let i=e.resultIndex;i<e.results.length;i++){ t += e.results[i][0].transcript; } field.appendText(t); haptic(10); };
   rec.onerror = e=>{
     let m = "Eroare la dictare.";
-    if(e.error==="not-allowed"||e.error==="service-not-allowed") m = "Acces la microfon refuzat sau blocat (frecvent la fișier local). Folosește microfonul de la tastatură.";
+    if(e.error==="not-allowed"||e.error==="service-not-allowed") m = "Microfonul e blocat aici (pe telefon de obicei nu merge). Folosește microfonul de la tastatura telefonului.";
     else if(e.error==="network") m = "Dictarea are nevoie de internet. Conectează-te sau folosește microfonul tastaturii.";
     else if(e.error==="no-speech") m = "Nu am auzit nimic. Mai încearcă.";
     else if(e.error==="audio-capture") m = "Nu găsesc microfonul pe dispozitiv.";
