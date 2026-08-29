@@ -258,6 +258,16 @@
   .flash.show{ animation:flashGata .9s ease; }
   .flash span{ background:var(--good); color:#fff; font-weight:800; font-size:1.4rem; padding:14px 26px; border-radius:16px; box-shadow:0 10px 30px var(--shadow); }
   @keyframes flashGata{ 0%{ opacity:0; transform:scale(.8);} 20%{ opacity:1; transform:scale(1);} 80%{ opacity:1;} 100%{ opacity:0; transform:scale(1);} }
+
+  /* ===== RANGE / ISTORIC / RIPPLE ===== */
+  input[type="range"]{ accent-color:var(--accent); }
+  .hist-item{ border:1px solid var(--border); border-radius:12px; padding:10px; margin-bottom:10px; background:var(--surface-2); }
+  .hist-when{ font-size:.72rem; color:var(--muted); margin-bottom:4px; }
+  .hist-snip{ font-size:.85rem; white-space:pre-wrap; margin-bottom:8px; max-height:80px; overflow:hidden; }
+  body.ripple-on .tbtn, body.ripple-on .generate, body.ripple-on .segmented button, body.ripple-on .hbtn-h, body.ripple-on .sheet-btn, body.ripple-on .info-btn, body.ripple-on .fab, body.ripple-on .set-mini{ position:relative; overflow:hidden; }
+  .ripple{ position:absolute; border-radius:50%; background:currentColor; pointer-events:none; transform:scale(0); }
+  .ripple.go{ animation:rippleA var(--rip-dur,.6s) ease-out forwards; }
+  @keyframes rippleA{ to{ transform:scale(2.6); opacity:0; } }
 </style>
 </head>
 <body>
@@ -305,7 +315,7 @@
   <!-- SETARI -->
   <section class="card">
     <div class="controls">
-      <div class="ctrl">
+      <div class="ctrl" id="ctrl-domain">
         <label for="domainSel">🎯 Domeniu</label>
         <select id="domainSel">
           <option value="auto">Auto — detectează domeniul</option>
@@ -320,16 +330,17 @@
           <option value="general">General</option>
         </select>
       </div>
-      <div class="ctrl">
+      <div class="ctrl" id="ctrl-currency">
         <label for="currencySel">💱 Monedă în estimări</label>
         <select id="currencySel">
           <option value="none">— Fără estimări financiare —</option>
           <option value="lei">Doar LEI (RON)</option>
           <option value="gbp">Doar GBP (£)</option>
+          <option value="eur">Doar EURO (€)</option>
           <option value="mix">Mix LEI / GBP / EUR</option>
         </select>
       </div>
-      <div class="ctrl">
+      <div class="ctrl" id="ctrl-region">
         <label>🌍 Regiune pentru linkuri</label>
         <div class="segmented" id="regionSeg">
           <button data-region="ro">🇷🇴 România</button>
@@ -339,7 +350,7 @@
         </div>
         <input type="text" id="otherCountry" placeholder="Scrie țara (ex: Germania, Italia)">
       </div>
-      <div class="ctrl">
+      <div class="ctrl" id="ctrl-device">
         <label>📖 Unde citești răspunsul</label>
         <div class="segmented seg3" id="deviceSeg">
           <button data-device="android">📱 Android</button>
@@ -348,7 +359,7 @@
         </div>
         <label class="chk-row"><input type="checkbox" id="audioFriendly"> 🔊 Prietenos pentru narator (numere scrise în litere)</label>
       </div>
-      <div class="ctrl">
+      <div class="ctrl" id="ctrl-lang">
         <label>🗣️ Limba răspunsului</label>
         <div class="segmented seg3" id="langSeg">
           <button data-lang="ro">🇷🇴 Română</button>
@@ -360,7 +371,7 @@
         </div>
         <label class="chk-row"><input type="checkbox" id="learnMode"> 🎓 Mod învățare — glosar cu traducere în română</label>
       </div>
-      <div class="ctrl">
+      <div class="ctrl" id="ctrl-friend">
         <label>🧩 Opțiuni extra</label>
         <label class="chk-row"><input type="checkbox" id="friendVersion"> 👥 Versiune curată de trimis prietenilor (titlu + bloc de cod)</label>
       </div>
@@ -370,7 +381,9 @@
 
   <!-- OUTPUT -->
   <section class="card">
-    <div class="lbl">🚀 Prompt optimizat <span class="hint">gata de lipit în orice AI</span></div>
+    <div class="lbl">🚀 Prompt optimizat <span class="hint">gata de lipit în orice AI</span>
+      <button class="tbtn" id="histBtn" title="Istoric (ultimele 5)" style="margin-left:auto; min-width:44px;">🕘</button>
+    </div>
     <textarea id="output" placeholder="Aici apare promptul complet, învelit în șablonul expert (surse + anti-halucinație + proactivitate + linkuri)..."></textarea>
     <div class="meta">
       <div class="count" id="count-output"></div>
@@ -392,7 +405,7 @@
   </section>
 
   <!-- VERSIUNE: schimbă doar numărul de mai jos (v3 → v4 → v5...) la fiecare urcare nouă pe GitHub -->
-  <p class="copyright">🏷️ v5 · © 2026 Sebastian Florin · Toate drepturile rezervate</p>
+  <p class="copyright">🏷️ v6 · © 2026 Sebastian Florin · Toate drepturile rezervate</p>
 
 </main>
 
@@ -481,7 +494,7 @@
             <li><b>IFRS</b> — standarde contabile pentru partea financiară.</li>
           </ul>
         </li>
-        <li><b>💱 Monedă</b> — în ce monedă să-ți dea prețurile: doar LEI, doar GBP (£) sau mix LEI/GBP/EUR.</li>
+        <li><b>💱 Monedă</b> — în ce monedă să-ți dea prețurile: doar LEI, doar GBP (£), doar EURO (€) sau mix LEI/GBP/EUR.</li>
         <li><b>🌍 Regiune linkuri</b> — din ce țară să-ți dea linkurile de cumpărare: România, UK, ambele sau o altă țară (scrisă manual).</li>
         <li><b>📖 Unde citești</b> — formatează răspunsul pentru <b>telefon</b> (coloană îngustă, fără scroll stânga-dreapta) sau <b>desktop</b> (tabele, formatare mai lată).</li>
         <li><b>🔊 Narator</b> — scrie numerele în litere, ca cititorul vocal (text-to-speech) să le pronunțe corect, nu cifră cu cifră.</li>
@@ -496,7 +509,10 @@
 
       <p><b>Personalizare (nou):</b></p>
       <ul>
-        <li><b>⚙️ Setări</b> (sus) — de aici ascunzi butoanele pe care nu le folosești (ca aplicația să fie mai simplă), alegi sunete, culori, mod glossy și vibrații. „Doar esențial” lasă puține butoane, „Ascunde tot” le ascunde pe toate, „Arată tot” le readuce. Tot ce alegi se salvează.</li>
+        <li><b>⚙️ Setări</b> (sus) — de aici ascunzi butoanele ȘI secțiunile întregi pe care nu le folosești (Domeniu, Monedă, Regiune, Limbă etc.), alegi sunete, culori, mod glossy, mărime și vibrații. „Doar esențial” / „Ascunde tot” / „Arată tot” pentru butoane, „Ascunde/Arată toate secțiunile” pentru zone. Tot ce alegi se salvează.</li>
+        <li><b>📏 Mărimea aplicației</b> — un cursor (10%–130%) care micșorează sau mărește TOT proporțional: butoane, text, căsuțe. Scrii și procentul exact. Dacă o faci prea mică și te încurci, butonul ⟲ o readuce la 100%.</li>
+        <li><b>🕘 Istoric</b> — butonul 🕘 de lângă „Prompt optimizat” îți arată ultimele 5 prompturi generate; apeși „Reîncarcă” și revii la oricare. Cel mai vechi se șterge automat.</li>
+        <li><b>💧 Efect ripple</b> — unda la apăsarea butoanelor. Din Setări îl pornești/oprești și îi reglezi intensitatea (0%–180%). Se oprește singur dacă ai activat „mișcare redusă” în telefon.</li>
         <li><b>Înălțime căsuțe</b> — sub „Ideea ta” și „Prompt optimizat” ai butoanele <b>1 / 2 / 3 / 4</b> care fac căsuța mai scundă sau mai înaltă. Poți și să tragi de colțul din dreapta-jos ca s-o întinzi exact cât vrei; butoanele nu dispar niciodată sub ecran. Notițele se reglează din butoanele ▲/▼ ale sertarului.</li>
         <li><b>✨ Mod glossy</b> — butoane mai strălucitoare și mai atractive.</li>
         <li><b>🎨 Culoarea butoanelor</b> — o alegi tu din Setări; „Culoare implicită” o readuce.</li>
@@ -535,6 +551,14 @@
       <button class="tbtn" id="setClose" title="Închide">✕</button>
     </div>
     <div class="modal-scroll">
+      <div class="set-sec">📏 Mărimea aplicației</div>
+      <p class="sub">Micșorează sau mărește TOT proporțional (butoane, text, căsuțe). De la 10% la 130%. Dacă o faci prea mică, butonul ⟲ de mai jos o readuce la 100%.</p>
+      <div class="set-row"><span class="srlab">Mărime</span>
+        <input type="range" id="zoomRange" min="10" max="130" step="5" style="flex:1">
+        <input type="number" id="zoomNum" min="10" max="130" class="set-sel" style="width:72px">
+        <span style="font-weight:700">%</span>
+      </div>
+
       <div class="set-sec">🎨 Aspect</div>
       <div class="set-row"><span class="srlab">✨ Mod glossy (butoane strălucitoare)</span><input type="checkbox" id="glossyChk"></div>
       <div class="set-row"><span class="srlab">🎨 Culoarea butoanelor</span><input type="color" id="accentColor" value="#4f46e5"></div>
@@ -553,6 +577,28 @@
       <div class="set-row"><span class="srlab">↩️ Înapoi</span><input type="checkbox" class="btn-vis" data-btn="undo"></div>
       <div class="set-row"><span class="srlab">↪️ Înainte</span><input type="checkbox" class="btn-vis" data-btn="redo"></div>
       <div class="set-row"><span class="srlab">📤 Trimite</span><input type="checkbox" class="btn-vis" data-btn="share"></div>
+
+      <div class="set-sec">🧩 Secțiuni vizibile</div>
+      <p class="sub">Ascunde secțiuni întregi de opțiuni, pentru o aplicație cât mai simplă.</p>
+      <div class="set-btns">
+        <button class="set-mini" id="secAllOff">Ascunde toate secțiunile</button>
+        <button class="set-mini" id="secAllOn">Arată toate secțiunile</button>
+      </div>
+      <div class="set-row"><span class="srlab">🎯 Domeniu</span><input type="checkbox" class="sec-vis" data-sec="domain"></div>
+      <div class="set-row"><span class="srlab">💱 Monedă</span><input type="checkbox" class="sec-vis" data-sec="currency"></div>
+      <div class="set-row"><span class="srlab">🌍 Regiune linkuri</span><input type="checkbox" class="sec-vis" data-sec="region"></div>
+      <div class="set-row"><span class="srlab">📖 Unde citești</span><input type="checkbox" class="sec-vis" data-sec="device"></div>
+      <div class="set-row"><span class="srlab">🗣️ Limba răspunsului</span><input type="checkbox" class="sec-vis" data-sec="lang"></div>
+      <div class="set-row"><span class="srlab">🧩 Versiune prieteni</span><input type="checkbox" class="sec-vis" data-sec="friend"></div>
+      <div class="set-row"><span class="srlab">📝 Notițe (butonul de jos)</span><input type="checkbox" class="sec-vis" data-sec="notes"></div>
+
+      <div class="set-sec">💧 Efect la apăsare (ripple)</div>
+      <div class="set-row"><span class="srlab">Activează efectul</span><input type="checkbox" id="rippleChk"></div>
+      <div class="set-row"><span class="srlab">Intensitate</span>
+        <input type="range" id="rippleRange" min="0" max="180" step="10" style="flex:1">
+        <input type="number" id="rippleNum" min="0" max="180" class="set-sel" style="width:72px">
+        <span style="font-weight:700">%</span>
+      </div>
 
       <div class="set-sec">🔊 Sunete</div>
       <div class="set-row"><span class="srlab">Sunet la apăsare</span>
@@ -586,6 +632,17 @@
 
       <button class="close" id="setCloseBtn">Gata</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL ISTORIC -->
+<div class="modal-back" id="histBack">
+  <div class="modal">
+    <div class="modal-top">
+      <h3>🕘 Istoric — ultimele 5</h3>
+      <button class="tbtn" id="histClose" title="Închide">✕</button>
+    </div>
+    <div class="modal-scroll" id="histList"></div>
   </div>
 </div>
 
@@ -828,6 +885,7 @@ const CURRENCY = {
   none: "",
   lei:  "MONEDĂ: Exprimă toate estimările financiare exclusiv în LEI (RON).",
   gbp:  "MONEDĂ: Exprimă toate estimările financiare exclusiv în GBP (£).",
+  eur:  "MONEDĂ: Exprimă toate estimările financiare exclusiv în EURO (€).",
   mix:  "MONEDĂ: Exprimă estimările financiare în format mixt — LEI (RON), GBP (£) și EUR (€) — și menționează cursul aproximativ folosit."
 };
 
@@ -929,6 +987,7 @@ disp + "\n\n" +
 "Dacă cererea e ambiguă, pune întâi 1–3 întrebări de clarificare esențiale, apoi continuă.";
 
   fields.output.setValue(prompt);
+  addHistory(prompt);
   toast("Prompt generat ✓"); haptic(30); doneSignal();
   $("output").scrollIntoView({ behavior:"smooth", block:"center" });
 }
@@ -1143,6 +1202,84 @@ $("resetFactory").addEventListener("click", ()=>{
     toast("Setări resetate ✓"); setTimeout(()=> location.reload(), 700);
   });
 });
+
+/* ============ MĂRIME APLICAȚIE (zoom global) ============ */
+const zoomRange = $("zoomRange"), zoomNum = $("zoomNum");
+function applyZoom(){ let z=parseInt(localStorage.getItem("apo_zoom")||"100",10); if(isNaN(z))z=100; z=Math.max(10,Math.min(130,z)); document.documentElement.style.zoom=(z/100); if(zoomRange) zoomRange.value=z; if(zoomNum) zoomNum.value=z; }
+function setZoom(v){ let z=Math.max(10,Math.min(130,parseInt(v,10)||100)); localStorage.setItem("apo_zoom",z); applyZoom(); }
+zoomRange.addEventListener("input", ()=> setZoom(zoomRange.value));
+zoomNum.addEventListener("input", ()=> setZoom(zoomNum.value));
+applyZoom();
+
+/* ============ SECTIUNI VIZIBILE ============ */
+const SECTIONS = { domain:"ctrl-domain", currency:"ctrl-currency", region:"ctrl-region", device:"ctrl-device", lang:"ctrl-lang", friend:"ctrl-friend", notes:"fab" };
+function applySecVis(){
+  Object.keys(SECTIONS).forEach(s=>{
+    const hidden = localStorage.getItem("apo_hidesec_"+s)==="1";
+    const el = $(SECTIONS[s]); if(el) el.style.display = hidden ? "none" : "";
+    const chk = document.querySelector('.sec-vis[data-sec="'+s+'"]'); if(chk) chk.checked = !hidden;
+  });
+}
+document.querySelectorAll(".sec-vis").forEach(chk=>{
+  chk.addEventListener("change", ()=>{ localStorage.setItem("apo_hidesec_"+chk.dataset.sec, chk.checked?"0":"1"); applySecVis(); haptic(6); });
+});
+$("secAllOff").addEventListener("click", ()=>{ Object.keys(SECTIONS).forEach(s=> localStorage.setItem("apo_hidesec_"+s,"1")); applySecVis(); haptic(8); });
+$("secAllOn").addEventListener("click", ()=>{ Object.keys(SECTIONS).forEach(s=> localStorage.setItem("apo_hidesec_"+s,"0")); applySecVis(); haptic(8); });
+applySecVis();
+
+/* ============ ISTORIC (ultimele 5 prompturi) ============ */
+function getHistory(){ try{ return JSON.parse(localStorage.getItem("apo_history")||"[]"); }catch(e){ return []; } }
+function addHistory(text){ let h=getHistory(); h.unshift({ t:Date.now(), text:text }); h=h.slice(0,5); try{ localStorage.setItem("apo_history", JSON.stringify(h)); }catch(e){} }
+function renderHistory(){
+  const list=$("histList"), h=getHistory();
+  if(!h.length){ list.innerHTML='<p class="sub">Încă nu ai generat niciun prompt.</p>'; return; }
+  list.innerHTML="";
+  h.forEach(item=>{
+    const when = new Date(item.t).toLocaleString();
+    const snip = item.text.slice(0,140).replace(/&/g,"&amp;").replace(/</g,"&lt;") + (item.text.length>140?"…":"");
+    const row=document.createElement("div"); row.className="hist-item";
+    row.innerHTML='<div class="hist-when">'+when+'</div><div class="hist-snip">'+snip+'</div>';
+    const btn=document.createElement("button"); btn.className="set-mini"; btn.textContent="↩️ Reîncarcă în Output";
+    btn.addEventListener("click", ()=>{ fields.output.setValue(item.text); $("histBack").classList.remove("show"); toast("Reîncărcat ✓"); haptic(8); $("output").scrollIntoView({behavior:"smooth",block:"center"}); });
+    row.appendChild(btn); list.appendChild(row);
+  });
+}
+$("histBtn").addEventListener("click", ()=>{ renderHistory(); $("histBack").classList.add("show"); });
+$("histClose").addEventListener("click", ()=> $("histBack").classList.remove("show"));
+$("histBack").addEventListener("click", e=>{ if(e.target===$("histBack")) $("histBack").classList.remove("show"); });
+
+/* ============ EFECT RIPPLE ============ */
+function rippleOn(){ return localStorage.getItem("apo_ripple") !== "0"; } // implicit pornit
+function rippleIntensity(){ let v=parseInt(localStorage.getItem("apo_rippleint")||"100",10); if(isNaN(v))v=100; return Math.max(0,Math.min(180,v)); }
+function applyRipple(){
+  document.body.classList.toggle("ripple-on", rippleOn());
+  const inten = rippleIntensity();
+  document.documentElement.style.setProperty("--rip-op", (0.35*inten/100).toFixed(3));
+  document.documentElement.style.setProperty("--rip-dur", (0.6*(0.7+inten/300)).toFixed(2)+"s");
+}
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+document.addEventListener("pointerdown", e=>{
+  if(!rippleOn() || reduceMotion || rippleIntensity()===0) return;
+  const host = e.target.closest(".tbtn,.generate,.segmented button,.hbtn-h,.sheet-btn,.info-btn,.fab,.set-mini");
+  if(!host) return;
+  const rect = host.getBoundingClientRect(); if(!rect.width) return;
+  const size = Math.max(rect.width, rect.height);
+  const rip = document.createElement("span"); rip.className="ripple";
+  rip.style.width = rip.style.height = size+"px";
+  rip.style.left = (e.clientX-rect.left-size/2)+"px";
+  rip.style.top  = (e.clientY-rect.top-size/2)+"px";
+  rip.style.opacity = getComputedStyle(document.documentElement).getPropertyValue("--rip-op") || "0.35";
+  host.appendChild(rip);
+  requestAnimationFrame(()=> rip.classList.add("go"));
+  setTimeout(()=> rip.remove(), 900);
+}, true);
+const rippleChk=$("rippleChk"), rippleRange=$("rippleRange"), rippleNum=$("rippleNum");
+function syncRippleUI(){ rippleChk.checked=rippleOn(); const v=rippleIntensity(); rippleRange.value=v; rippleNum.value=v; }
+rippleChk.addEventListener("change", ()=>{ localStorage.setItem("apo_ripple", rippleChk.checked?"1":"0"); applyRipple(); haptic(6); });
+function setRippleInt(v){ let n=Math.max(0,Math.min(180,parseInt(v,10)||0)); localStorage.setItem("apo_rippleint",n); applyRipple(); syncRippleUI(); }
+rippleRange.addEventListener("input", ()=> setRippleInt(rippleRange.value));
+rippleNum.addEventListener("input", ()=> setRippleInt(rippleNum.value));
+applyRipple(); syncRippleUI();
 </script>
 </body>
 </html>
